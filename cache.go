@@ -86,7 +86,7 @@ type Cache[K comparable, V any] struct {
 	cache Interface[K, *Item[K, V]]
 	//expirations map[K]chan struct{}
 	// mu is used to do lock in some method process.
-	mu      sync.Mutex
+	mu      sync.RWMutex
 	janitor *janitor
 }
 
@@ -178,8 +178,8 @@ func NewContext[K comparable, V any](ctx context.Context, opts ...Option[K, V]) 
 
 // Get looks up a key's value from the cache.
 func (c *Cache[K, V]) Get(key K) (value V, ok bool) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	item, ok := c.cache.Get(key)
 
 	if !ok {
@@ -222,9 +222,35 @@ func (c *Cache[K, V]) Set(key K, val V, opts ...ItemOption) {
 
 // Keys returns the keys of the cache. the order is relied on algorithms.
 func (c *Cache[K, V]) Keys() []K {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.cache.Keys()
+}
+
+func (c *Cache[K, V]) List() map[K]V {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	keys := c.cache.Keys()
+	items := make(map[K]V, len(keys))
+	for _, v := range keys {
+		item, ok := c.cache.Get(v)
+		if ok {
+			items[v] = item.Value
+		}
+	}
+
+	return items
+}
+
+func (c *Cache[K, V]) Flush() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.cache.Keys()
+
+	keys := c.cache.Keys()
+	for _, v := range keys {
+		c.cache.Delete(v)
+	}
 }
 
 // Delete deletes the item with provided key from the cache.
@@ -236,8 +262,8 @@ func (c *Cache[K, V]) Delete(key K) {
 
 // Contains reports whether key is within cache.
 func (c *Cache[K, V]) Contains(key K) bool {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	_, ok := c.cache.Get(key)
 	return ok
 }
