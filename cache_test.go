@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	cache "github.com/Code-Hex/go-generics-cache"
-	"github.com/Code-Hex/go-generics-cache/policy/clock"
-	"github.com/Code-Hex/go-generics-cache/policy/fifo"
-	"github.com/Code-Hex/go-generics-cache/policy/lfu"
-	"github.com/Code-Hex/go-generics-cache/policy/lru"
-	"github.com/Code-Hex/go-generics-cache/policy/mru"
+	cache "github.com/gekatateam/go-generics-cache"
+	"github.com/gekatateam/go-generics-cache/policy/clock"
+	"github.com/gekatateam/go-generics-cache/policy/fifo"
+	"github.com/gekatateam/go-generics-cache/policy/lfu"
+	"github.com/gekatateam/go-generics-cache/policy/lru"
+	"github.com/gekatateam/go-generics-cache/policy/mru"
 )
 
 func TestMultiThreadIncr(t *testing.T) {

@@ -3,7 +3,7 @@ package fifo_test
 import (
 	"fmt"
 
-	"github.com/Code-Hex/go-generics-cache/policy/fifo"
+	"github.com/gekatateam/go-generics-cache/policy/fifo"
 )
 
 func ExampleNewCache() {
